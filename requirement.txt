@@ -1,0 +1,7 @@
+# The program itself only needs the Python standard library.
+# These are the development tools required by the Makefile.
+
+flake8>=6.0.0
+mypy>=1.0.0
+build>=1.0.0
+pytest>=7.0.0
