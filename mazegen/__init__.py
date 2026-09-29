@@ -7,4 +7,4 @@ from .constants import NORTH, EAST, SOUTH, WEST
 from .generator import MazeGenerator
 from .validator import MazeError, check_all
 
-__all__ = ["MazeError", "check_all", "MazeGenerator", "NORTH", "EAST", "SOUTH", "WEST", "MazeVisualizer"]  # noqa:E501
+__all__ = ["MazeError", "check_all", "MazeGenerator", "NORTH", "EAST", "SOUTH", "WEST"]  # noqa:E501

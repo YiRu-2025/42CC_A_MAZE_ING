@@ -61,6 +61,9 @@ class ConfigParser:
         except Exception as e:
             print(f"Unexpected error: {e}", file=sys.stderr)
             sys.exit(1)
+        except OSError:
+            print(f"Error: cannot read '{self.filepath}'", file=sys.stderr)
+            sys.exit(1)
 
     def _validate_and_cast(self) -> None:
         """Check required keys, validate values and convert their types.

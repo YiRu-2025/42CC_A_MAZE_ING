@@ -14,4 +14,7 @@ EXIT=19,14
 OUTPUT_FILE=maze.txt
 
 # PERFECT Is the maze perfect?
-PERFECT=False
+PERFECT=True
+
+# SEED Random seed for reproducible generation
+SEED=42

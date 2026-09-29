@@ -10,7 +10,7 @@ def has_wall(grid: list[list[int]], x: int, y: int, direction: int) -> bool:
     return bool(grid[y][x] & direction)
 
 
-def check_coherence(grid: list[list[int]]):
+def check_coherence(grid: list[list[int]]) -> None:
     """Check that 2 neighbours agree about the wall they share.
     Only the east and south sides are tested, because every shared wall
     is then looked at exactly once.
@@ -33,12 +33,12 @@ def check_coherence(grid: list[list[int]]):
                 wallshare2 = has_wall(grid, x, y + 1, NORTH)
                 if wallshare1 != wallshare2:
                     raise MazeError(
-                        f"wall mismatch between ({x},{y}) south "
+                        f"wall mismatch between ({x},{y + 1}) south "
                         f"and ({y + 1},{y}) north"
                     )
 
 
-def check_border(grid: list[list[int]]):
+def check_border(grid: list[list[int]]) -> None:
     """Check that the outer border of the maze is fully closed."""
     height = len(grid)
     width = len(grid[0])
@@ -66,7 +66,7 @@ def _is_open_block(grid: list[list[int]], left: int, top: int) -> bool:
     return True
 
 
-def check_no_open3x3(grid: list[list[int]]):
+def check_no_open3x3(grid: list[list[int]]) -> None:
     """Check that no 3x3 area of the maze is completely open."""
     height = len(grid)
     width = len(grid[0])
@@ -76,7 +76,7 @@ def check_no_open3x3(grid: list[list[int]]):
                 raise MazeError(f"3x3 open area starting at ({left},{top})")
 
 
-def check_connectivity(grid: list[list[int]], blocked: set[tuple[int, int]]):
+def check_connectivity(grid: list[list[int]], blocked: set[tuple[int, int]]) -> None:  # noqa:E501
     """Check that every cell can be reached, except the '42' pattern.
 
     A flood fill is started from the first cell that is not part of the
@@ -127,7 +127,7 @@ def check_connectivity(grid: list[list[int]], blocked: set[tuple[int, int]]):
         )
 
 
-def check_all(grid: list[list[int]], blocked: set[tuple[int, int]]):
+def check_all(grid: list[list[int]], blocked: set[tuple[int, int]]) -> None:  # noqa:E501
     """Check all the error situation"""
     check_coherence(grid)
     check_border(grid)
