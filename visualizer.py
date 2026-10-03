@@ -131,7 +131,7 @@ class MazeVisualizer:
         path_cells: set[tuple[int, int]],
     ) -> None:
         wc = self._wall_color
-        line = ""
+        line = " "
         for x in range(width):
             line += self._cell_content((x, y), entry, exit_, blocked, path_cells)  # noqa E501
             line += f"{wc}|{RESET}" if grid[y][x] & EAST else " "
@@ -160,9 +160,9 @@ class MazeVisualizer:
         if cell == exit_:
             return f"{EXIT_COLOR}{BOLD} E {RESET}"
         if cell in blocked:
-            return f"{self._pattern_color}{BOLD}42 {RESET}"
+            return f"{self._pattern_color}{BOLD} X {RESET}"
         if cell in path_cells:
-            return f"{PATH_COLOR} . {RESET}"
+            return f"{PATH_COLOR} * {RESET}"
         return "   "
 
     # -- interactive menu -------------------------------------------------

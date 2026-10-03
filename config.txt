@@ -17,4 +17,4 @@ OUTPUT_FILE=maze.txt
 PERFECT=True
 
 # SEED Random seed for reproducible generation
-SEED=42
+SEED=0
