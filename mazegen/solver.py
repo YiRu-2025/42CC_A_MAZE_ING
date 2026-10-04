@@ -1,33 +1,13 @@
-"""Find the shortest path between two cells of a maze"""
+"""Find the shortest path between two cells of a maze."""
 
 from collections import deque
+
 from .constants import ALL_DIRECTIONS, DELTA, LETTER
+from .grid import open_neighbours
 
 
 class NoPathError(Exception):
     """Raised when no path exists between the entry and the exit."""
-
-
-def _open_neighbours(
-    grid: list[list[int]], cell: tuple[int, int]
-) -> list[tuple[int, int]]:
-    """List the neighbours that can be reached without crossing a wall.
-    Returns:
-    The coordinates of every neighbour reachable in one step.
-    """
-    x, y = cell
-    height = len(grid)
-    width = len(grid[0])
-    neighbours = []
-
-    for direction in ALL_DIRECTIONS:
-        if grid[y][x] & direction:
-            continue
-        next_x = x + DELTA[direction][0]
-        next_y = y + DELTA[direction][1]
-        if 0 <= next_x < width and 0 <= next_y < height:
-            neighbours.append((next_x, next_y))
-    return neighbours
 
 
 def _rebuild_path(
@@ -52,9 +32,13 @@ def _rebuild_path(
 def solve(
     grid: list[list[int]], entry: tuple[int, int], exit_cell: tuple[int, int]
 ) -> list[tuple[int, int]]:
-    """Find the shortest path from the entry to the exit.
+    """Find the shortest path from the entry to the exit (breadth-first).
+
     Returns:
         The list of cells from the entry to the exit, both included.
+
+    Raises:
+        NoPathError: If the exit cannot be reached from the entry.
     """
     if entry == exit_cell:
         return [entry]
@@ -66,7 +50,7 @@ def solve(
         cell = queue.popleft()
         if cell == exit_cell:
             return _rebuild_path(came_from, entry, exit_cell)
-        for neighbour in _open_neighbours(grid, cell):
+        for neighbour in open_neighbours(grid, cell):
             if neighbour in seen:
                 continue
             seen.add(neighbour)

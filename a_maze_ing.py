@@ -1,13 +1,13 @@
 """Main entry point for the A-Maze-ing maze generator."""
 
 import sys
+from typing import Any
 
 from config_parser import ConfigParser
 from exporter import ExportError, save_maze
 from mazegen.generator import MazeGenerator
 from mazegen.solver import NoPathError, solve
 from mazegen.validator import MazeError, check_all
-from typing import Any
 from visualizer import MazeVisualizer
 
 
@@ -39,7 +39,9 @@ def _generate_and_solve(
         seed=config.get("SEED") if use_seed else None,
     )
     grid = generator.generate()
-    check_all(grid, generator.blocked)
+    for warning in generator.warnings:
+        print(f"Warning: {warning}", file=sys.stderr)
+    check_all(grid, generator.blocked, perfect=config["PERFECT"])
     path = solve(grid, config["ENTRY"], config["EXIT"])
     return generator, grid, path
 
@@ -63,6 +65,44 @@ def _save_and_announce(
     )
 
 
+def _run_menu(
+    config: dict[str, Any],
+    generator: MazeGenerator,
+    grid: list[list[int]],
+    path: list[tuple[int, int]],
+) -> None:
+    """Draw the maze and handle the menu until the user quits."""
+    visualizer = MazeVisualizer()
+
+    while True:
+        visualizer.display(
+            grid=grid,
+            entry=config["ENTRY"],
+            exit_=config["EXIT"],
+            blocked=generator.blocked,
+            path=path,
+        )
+
+        action = visualizer.run_menu()
+        if action == "quit":
+            return
+
+        if action == "regenerate":
+            try:
+                generator, grid, path = _generate_and_solve(
+                    config, use_seed=False
+                )
+            except (MazeError, NoPathError, ValueError) as err:
+                print(
+                    f"Error: {err} (keeping the previous maze)",
+                    file=sys.stderr,
+                )
+                continue
+            _save_and_announce(config, grid, path)
+        # any other action (path toggled, colors rotated) just redraws
+        # the same maze on the next loop iteration.
+
+
 def main() -> int:
     """Run the maze generation pipeline with its interactive menu.
 
@@ -73,54 +113,21 @@ def main() -> int:
         print("Usage: python3 a_maze_ing.py <config_file>", file=sys.stderr)
         return 1
 
-    config_path = sys.argv[1]
-
     try:
-        parser = ConfigParser(config_path)
-        config = parser.parse()
-
+        config = ConfigParser(sys.argv[1]).parse()
         generator, grid, path = _generate_and_solve(config, use_seed=True)
         _save_and_announce(config, grid, path)
-
-        visualizer = MazeVisualizer()
-
-        while True:
-            visualizer.display(
-                grid=grid,
-                entry=config["ENTRY"],
-                exit_=config["EXIT"],
-                blocked=generator.blocked,
-                path=path,
-            )
-
-            action = visualizer.run_menu()
-            if action == "quit":
-                return 0
-
-            if action == "regenerate":
-                try:
-                    generator, grid, path = _generate_and_solve(
-                        config, use_seed=False
-                    )  # noqa E1501
-                except (MazeError, NoPathError, ValueError) as err:
-                    print(
-                        f"Error: {err} (keeping the previous maze)", file=sys.stderr  # noqa: E501
-                    )  # noqa E1501
-                    continue
-                try:
-                    _save_and_announce(config, grid, path)
-                except ExportError as err:
-                    print(f"Error: {err}", file=sys.stderr)
-                    return 1
-            # any other action (path toggled, colors rotated) just redraws
-            # the same maze on the next loop iteration.
-
+        _run_menu(config, generator, grid, path)
+        return 0
     except (MazeError, NoPathError, ExportError, ValueError) as err:
         print(f"Error: {err}", file=sys.stderr)
         return 1
     except (KeyboardInterrupt, EOFError):
         print("\nOperation cancelled by user.", file=sys.stderr)
         return 130
+    except Exception as err:  # the program must never crash with a trace
+        print(f"Unexpected error: {err}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

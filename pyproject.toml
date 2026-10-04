@@ -1,12 +1,12 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "mazegen"
 version = "1.0.0"
 description = "A reusable maze generator: perfect mazes and playable boards"
-readme = "README.md"
+readme = "mazegen/README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE.md"]
@@ -16,5 +16,9 @@ keywords = ["maze", "generator", "42"]
 [tool.setuptools]
 packages = ["mazegen"]
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
 [tool.mypy]
-exclude = ["venv", "build", "dist"]
+exclude = ["amaze-virtual", "venv", "build", "dist"]

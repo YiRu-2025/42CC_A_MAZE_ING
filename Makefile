@@ -1,41 +1,53 @@
-.PHONY: install run debug clean fclean lint lint-strict re build
+.PHONY: install run debug test clean fclean re build lint lint-strict
 
+VENV = amaze-virtual
+PYTHON = $(VENV)/bin/python
+PIP = $(VENV)/bin/pip
 
-# install
+# install the development tools in a virtual environment
 install:
-	pip install -r requirement.txt
+	python3 -m venv $(VENV)
+	$(PIP) install -r requirement.txt
 
-# run
+# run the program with the default configuration
 run:
-	python3 a_maze_ing.py config.txt
+	$(PYTHON) a_maze_ing.py config.txt
 
-# debug
+# run the program under the Python debugger
 debug:
-	python3 -m pdb a_maze_ing.py config.txt
+	$(PYTHON) -m pdb a_maze_ing.py config.txt
 
-# clean and fclean
+# run the unit tests
+test:
+	$(PYTHON) -m pytest -q
+
+# remove caches and build artifacts
 clean:
 	rm -rf __pycache__ mazegen/__pycache__ tests/__pycache__
 	rm -rf .mypy_cache .pytest_cache
-
-fclean: clean
 	rm -rf build dist *.egg-info
+
+# also remove the virtual environment and the generated maze
+# (the mazegen-*.whl at the root is a deliverable and is kept)
+fclean: clean
+	rm -rf $(VENV)
 	rm -f maze.txt
 
-re: fclean
-	python3 -m build
+# rebuild everything from scratch
+re: fclean install build
 
-# lint
-lint:
-	flake8 .
-	mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
-
-# lint-strict
-lint-strict:
-	flake8 .
-	mypy . --strict
-
+# build the reusable package and copy it to the root of the repository
 build:
-	pip install build
-	python3 -m build
+	$(PYTHON) -m build
+	rm -f mazegen-*.whl
 	cp dist/mazegen-*.whl .
+
+lint:
+	$(PYTHON) -m flake8 .
+	$(PYTHON) -m mypy . --warn-return-any --warn-unused-ignores \
+		--ignore-missing-imports --disallow-untyped-defs \
+		--check-untyped-defs
+
+lint-strict:
+	$(PYTHON) -m flake8 .
+	$(PYTHON) -m mypy . --strict

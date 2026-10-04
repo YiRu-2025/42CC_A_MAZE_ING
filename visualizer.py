@@ -10,7 +10,10 @@ lets the user regenerate the maze, show or hide the path, and rotate
 the colors used for the walls and for the "42" pattern.
 """
 
-from mazegen.constants import NORTH, EAST, SOUTH
+import shutil
+import sys
+
+from mazegen.constants import EAST, NORTH, SOUTH
 
 RESET = "\033[0m"
 BOLD = "\033[1m"
@@ -101,6 +104,7 @@ class MazeVisualizer:
 
         height = len(grid)
         width = len(grid[0])
+        self._warn_if_too_wide(width)
         path_cells = set(path) if (self.show_path and path) else set()
 
         self._print_top_border(grid, width)
@@ -108,6 +112,18 @@ class MazeVisualizer:
             self._print_cell_row(grid, y, width, entry,
                                  exit_, blocked, path_cells)
             self._print_horizontal_walls(grid, y, width)
+
+    @staticmethod
+    def _warn_if_too_wide(width: int) -> None:
+        """Tell the user when the drawing is wider than the terminal."""
+        needed = width * 4 + 1
+        columns = shutil.get_terminal_size().columns
+        if sys.stdout.isatty() and needed > columns:
+            print(
+                f"Note: the maze needs {needed} columns but the terminal "
+                f"has {columns}; enlarge the window to read it.",
+                file=sys.stderr,
+            )
 
     def _print_top_border(
         self, grid: list[list[int]], width: int
@@ -133,7 +149,9 @@ class MazeVisualizer:
         wc = self._wall_color
         line = " "
         for x in range(width):
-            line += self._cell_content((x, y), entry, exit_, blocked, path_cells)  # noqa E501
+            line += self._cell_content(
+                (x, y), entry, exit_, blocked, path_cells
+            )
             line += f"{wc}|{RESET}" if grid[y][x] & EAST else " "
         print(line)
 
@@ -143,7 +161,8 @@ class MazeVisualizer:
         wc = self._wall_color
         line = ""
         for x in range(width):
-            line += f"{wc}+---{RESET}" if grid[y][x] & SOUTH else f"{wc}+{RESET}   " # noqa E501
+            line += (f"{wc}+---{RESET}"
+                     if grid[y][x] & SOUTH else f"{wc}+{RESET}   ")
         line += f"{wc}+{RESET}"
         print(line)
 

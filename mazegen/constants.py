@@ -1,7 +1,9 @@
-"""Direction constants shared by the maze generator."""
+"""Direction constants shared by the maze generator.
 
-# 单元格(x, y)，那么移动后的坐标就是 (x + dx, y + dy)。
-# 二维数组 grid[row][col] 里，行是 y，列是 x，取值时记得对应 grid[y + dy][x + dx]
+A cell (x, y) moved in a direction (dx, dy) becomes (x + dx, y + dy).
+In the two-dimensional grid the row is y and the column is x, so the
+neighbour is read with grid[y + dy][x + dx].
+"""
 
 NORTH = 1
 EAST = 2
